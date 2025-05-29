@@ -1,6 +1,6 @@
 import { commandHelp } from "./command_help.js";
 import { commandExit } from "./command_exit.js";
-import { commandMapForward, commandMapBack } from "./command_map.js";
+import { commandMapForward, commandMapBack, commandExplore, commandCatch, commandInspect } from "./command_map.js";
 
 import type { CLICommand } from "./state.js";
 
@@ -25,6 +25,21 @@ export function getCommands(): Record<string, CLICommand> {
       name: "mapb",
       description: "Get the previous page of locations",
       callback: commandMapBack,
+    },
+    explore: {
+      name: "explore",
+      description: "Explore a location",
+      callback: commandExplore,
+    },
+    catch: {
+      name: "catch",
+      description: "Catch a pokemon",
+      callback: commandCatch,
+    },
+    inspect: {
+      name: "inspect",
+      description: "Inspect a pokemon",
+      callback: commandInspect,
     },
   };
 }
