@@ -1,36 +1,40 @@
-import { createInterface } from "node:readline";
-import { commandExit } from "./command_exit.js";
 import { State } from "./state.js";
 
-export function cleanInput(input: string): string[] {
-    // logic goes here
-    let inputLowerCase = input.toLowerCase();
-    return inputLowerCase.trim().split(/\s+/);
-}
+export async function startREPL(state: State) {
+  state.readline.prompt();
 
-export function startREPL(state: State) {
-  const rl = state.readline;
-  
-  rl.prompt();
-  
-  rl.on("line", (input: string) => {
-
-    if (input.length === 0) {
-      rl.prompt();
+  state.readline.on("line", async (input) => {
+    const words = cleanInput(input);
+    if (words.length === 0) {
+      state.readline.prompt();
       return;
     }
-    
-    let inputArray = cleanInput(input);
-    const commands = state.commands;
-    const commandName = inputArray[0];
-    
-    if (commandName in commands) {
-      commands[commandName].callback(state);
-    } else {
-      console.log("Unknown command");
+
+    const commandName = words[0];
+
+    const cmd = state.commands[commandName];
+    if (!cmd) {
+      console.log(
+        `Unknown command: "${commandName}". Type "help" for a list of commands.`,
+      );
+      state.readline.prompt();
+      return;
     }
-    
-    rl.prompt();
-    
+
+    try {
+      await cmd.callback(state);
+    } catch (e) {
+      console.log((e as Error).message);
+    }
+
+    state.readline.prompt();
   });
+}
+
+export function cleanInput(input: string): string[] {
+  return input
+    .toLowerCase()
+    .trim()
+    .split(" ")
+    .filter((word) => word !== "");
 }

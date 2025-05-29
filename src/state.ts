@@ -1,41 +1,33 @@
 import { createInterface, type Interface } from "readline";
-import { commandHelp } from "./command_help.js";
-import { commandExit } from "./command_exit.js";
+import { getCommands } from "./commands.js";
+import { PokeAPI } from "./pokeapi.js";
 
 export type CLICommand = {
-    name: string;
-    description: string;
-    callback: (state: State) => void;
-  };
-  
-  export type State = {
-    commands: Record<string, CLICommand>;
-    readline: Interface;
-  };
+  name: string;
+  description: string;
+  callback: (state: State) => Promise<void>;
+};
 
-  export function initState(): State {
-    const rl = createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        prompt: "Pokedex >",
-      });
+export type State = {
+  readline: Interface;
+  commands: Record<string, CLICommand>;
+  pokeAPI: PokeAPI;
+  nextLocationsURL: string;
+  prevLocationsURL: string;
+};
 
-   const commandRegistry: Record<string, CLICommand> = {
-    help: {
-      name: "help",
-      description: "Displays a help message",
-      callback: commandHelp,
-    },
-    exit: {
-      name: "exit",
-      description: "Exit the Pokedex",
-      callback: commandExit,
-    },
-  };
-  
+export function initState() {
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    prompt: "pokedex > ",
+  });
+
   return {
-    commands : commandRegistry,
-    readline : rl,
-  }
-    
-  }
+    readline: rl,
+    commands: getCommands(),
+    pokeAPI: new PokeAPI(),
+    nextLocationsURL: "",
+    prevLocationsURL: "",
+  };
+}
